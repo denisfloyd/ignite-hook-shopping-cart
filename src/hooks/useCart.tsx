@@ -65,7 +65,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         JSON.stringify(currentCartToUpdate)
       );
     } catch {
-      toast.error("Erro na alteração de quantidade do produto");
+      toast.error('Erro na adição do produto');
     }
   };
 
@@ -76,30 +76,54 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         (product) => product.id === productId
       );
 
-      console.log(productIndexToRemove);
-
       if (productIndexToRemove >= 0) {
         currentCartToUpdate.splice(productIndexToRemove, 1);
-        console.log(currentCartToUpdate)
         setCart(currentCartToUpdate);
         localStorage.setItem("@RocketShoes:cart", JSON.stringify(currentCartToUpdate));
         return;
       } else {
-        throw Error('Produto não existe');
+        throw new Error();
       }
-    } catch(err: Error | any) {
-      err ? toast.error(err) : toast.error('Erro na remoção do produto');
+    } catch {
+      toast.error('Erro na remoção do produto');
     }
   };
 
   const updateProductAmount = async ({
     productId,
-    amount,
+    amount: newAmount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+      if(newAmount <= 0) {
+        return;
+      }
+
+      const currentCartToUpdate = [...cart];
+      const productExists = currentCartToUpdate.find(
+        (product) => product.id === productId
+      );
+  
+      if(productExists) {
+        const stock = await api.get<Stock>(`stock/${productId}`);
+        const stockAmount = stock.data.amount;
+
+        if (newAmount > stockAmount) {
+          toast.error("Quantidade solicitada fora de estoque");
+          return;
+        }
+
+        productExists.amount = newAmount;
+        
+        setCart(currentCartToUpdate);
+        localStorage.setItem(
+          "@RocketShoes:cart",
+          JSON.stringify(currentCartToUpdate)
+        );
+      } else { 
+        throw new Error();
+      }
     } catch {
-      // TODO
+      toast.error('Erro na alteração de quantidade do produto');
     }
   };
 
