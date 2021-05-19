@@ -50,7 +50,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         return;
       }
 
-      console.log(productExists);
       if (productExists) {
         productExists.amount = newProductCartAmount;
       } else {
@@ -60,7 +59,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         currentCart.push(productToAdd);
       }
 
-      console.log(currentCart);
       setCart(currentCart);
       localStorage.setItem("@RocketShoes:cart", JSON.stringify(currentCart));
     } catch {
